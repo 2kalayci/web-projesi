@@ -2,8 +2,8 @@
 	
 *Kullanılan araç:	claude.ai 
 *Kullanım tarihi:	15.10.2026
-*Proje	webb: ortak harcamaları takip eden web uygulaması
-*Kullanım amacı:	Fikir bulma, prototip kodu
+*Proje	web: ortak harcamaları takip eden web uygulaması
+*Kullanım amacı:	prototip kodu
 
 
 **Sorduğum:** [README]'de yazdığım problemleri karşılayacak özellikte bir şeyler yapmaya çalıştım fakat var olan birkaç eksik var bunları benim için halledebilir misin?
