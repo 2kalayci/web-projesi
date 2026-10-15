@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>webb · Ortak Gider Takipçisi</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1ee; --surface:#fbfcfb; --ink:#16231f; --muted:#5d6b66;
+  --line:#cfd8d3; --accent:#0f6b57; --accent-ink:#ffffff;
+  --plus:#0f6b57; --minus:#b3402a;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#101815; --surface:#17211d; --ink:#e7efeb; --muted:#93a39c;
+    --line:#2b3a34; --accent:#4cc3a3; --accent-ink:#0b1713; --plus:#4cc3a3; --minus:#ef8d77;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:960px;margin:0 auto;padding:32px 20px 64px}
+h1{font-size:2.2rem;font-weight:800;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 28px;max-width:56ch}
+h2{font-size:1.1rem;margin:0 0 12px;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.full{grid-column:1/-1}
+label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;
+  background:var(--bg);color:var(--ink);font:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);
+  background:transparent;color:var(--ink);padding:8px 12px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);margin-top:14px;font-weight:600}
+button.small{padding:4px 9px;font-size:.82rem}
+.row{display:flex;gap:8px}
+.row input{flex:1}
+.row button{white-space:nowrap}
+ul{list-style:none;margin:12px 0 0;padding:0}
+li{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:10px 0;border-top:1px dashed var(--line)}
+li:first-child{border-top:0}
+.meta{color:var(--muted);font-size:.85rem}
+.amt{font-weight:600;white-space:nowrap}
+.acts{display:flex;gap:6px}
+.pos{color:var(--plus)} .neg{color:var(--minus)}
+.empty{color:var(--muted);font-size:.92rem;margin:12px 0 0}
+.total{display:flex;justify-content:space-between;border-top:2px solid var(--ink);
+  margin-top:12px;padding-top:10px;font-weight:800}
+.msg{min-height:1.2em;font-size:.88rem;color:var(--minus);margin:8px 0 0}
+.pay{font-size:1.02rem}
+.pay b{font-weight:800}
+footer{margin-top:28px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Ortak Gider Takipçisi</h1>
+  <p class="sub">Kişileri ekle, harcamaları gir. Kişi başı payı ve kimin kime ne ödemesi gerektiğini otomatik hesaplarız.</p>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Kişiler</h2>
+      <div class="row">
+        <input id="personName" type="text" placeholder="İsim" aria-label="Kişi adı" maxlength="30">
+        <button id="addPerson">Kişi ekle</button>
+      </div>
+      <p class="msg" id="personMsg" role="status"></p>
+      <ul id="peopleList"></ul>
+    </section>
+
+    <section class="panel">
+      <h2 id="formTitle">Harcama ekle</h2>
+      <label for="desc">Açıklama</label>
+      <input id="desc" type="text" placeholder="Örn. Market alışverişi" maxlength="60">
+      <label for="amount">Tutar (TL)</label>
+      <input id="amount" type="number" min="0" step="0.01" placeholder="0,00" inputmode="decimal">
+      <label for="payer">Kim ödedi?</label>
+      <select id="payer"></select>
+      <div class="row">
+        <button class="primary" id="saveExpense">Harcamayı ekle</button>
+        <button id="cancelEdit" style="display:none;margin-top:14px">Vazgeç</button>
+      </div>
+      <p class="msg" id="expenseMsg" role="status"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Harcamalar</h2>
+      <ul id="expenseList"></ul>
+      <div class="total"><span>Toplam</span><span id="totalAmt">0,00 TL</span></div>
+    </section>
+
+    <section class="panel">
+      <h2>Hesap durumu</h2>
+      <p class="meta" id="shareInfo"></p>
+      <ul id="balanceList"></ul>
+      <h2 style="margin-top:20px">Kim kime ödeyecek?</h2>
+      <ul id="settleList"></ul>
+    </section>
+  </div>
+
+  <footer>Veriler yalnızca bu tarayıcıda saklanır. <button class="small" id="resetAll">Tüm verileri sil</button></footer>
+</div>
+
+<script>
+const KEY = "webb-ortak-gider";
+let state = { people: [], expenses: [], nextId: 1 };
+let editingId = null;
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ const s = JSON.parse(raw);
+      if(s && Array.isArray(s.people) && Array.isArray(s.expenses)) state = s; }
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2}) + " TL";
+const personName = id => (state.people.find(p => p.id === id) || {name:"?"}).name;
+
+function addPerson(){
+  const name = $("personName").value.trim();
+  const msg = $("personMsg");
+  if(!name){ msg.textContent = "Bir isim yaz."; return; }
+  if(state.people.some(p => p.name.toLowerCase() === name.toLowerCase())){
+    msg.textContent = "Bu isim zaten listede."; return; }
+  state.people.push({id: state.nextId++, name});
+  $("personName").value = ""; msg.textContent = "";
+  save(); render();
+}
+
+function removePerson(id){
+  if(state.expenses.some(e => e.payer === id)){
+    $("personMsg").textContent = personName(id) + " bir harcamayı ödemiş. Önce o harcamayı sil veya değiştir."; return; }
+  state.people = state.people.filter(p => p.id !== id);
+  $("personMsg").textContent = "";
+  save(); render();
+}
+
+function saveExpense(){
+  const desc = $("desc").value.trim();
+  const amount = parseFloat($("amount").value);
+  const payer = parseInt($("payer").value, 10);
+  const msg = $("expenseMsg");
+  if(state.people.length < 2){ msg.textContent = "Önce en az iki kişi ekle."; return; }
+  if(!desc){ msg.textContent = "Açıklama yaz."; return; }
+  if(!(amount > 0)){ msg.textContent = "Tutar sıfırdan büyük olmalı."; return; }
+  if(!payer){ msg.textContent = "Ödeyen kişiyi seç."; return; }
+  if(editingId){
+    const e = state.expenses.find(x => x.id === editingId);
+    if(e){ e.desc = desc; e.amount = amount; e.payer = payer; }
+  } else {
+    state.expenses.push({id: state.nextId++, desc, amount, payer});
+  }
+  stopEdit(); msg.textContent = "";
+  save(); render();
+}
+
+function startEdit(id){
+  const e = state.expenses.find(x => x.id === id); if(!e) return;
+  editingId = id;
+  $("desc").value = e.desc; $("amount").value = e.amount; $("payer").value = e.payer;
+  $("formTitle").textContent = "Harcamayı düzenle";
+  $("saveExpense").textContent = "Değişiklikleri kaydet";
+  $("cancelEdit").style.display = "";
+  $("desc").focus();
+}
+function stopEdit(){
+  editingId = null;
+  $("desc").value = ""; $("amount").value = "";
+  $("formTitle").textContent = "Harcama ekle";
+  $("saveExpense").textContent = "Harcamayı ekle";
+  $("cancelEdit").style.display = "none";
+}
+function removeExpense(id){
+  state.expenses = state.expenses.filter(e => e.id !== id);
+  if(editingId === id) stopEdit();
+  save(); render();
+}
+
+// Bakiye: ödediği - payı. Pozitif = alacaklı, negatif = borçlu.
+function balances(){
+  const total = state.expenses.reduce((s,e) => s + e.amount, 0);
+  const share = state.people.length ? total / state.people.length : 0;
+  const paid = {}; state.people.forEach(p => paid[p.id] = 0);
+  state.expenses.forEach(e => { if(e.payer in paid) paid[e.payer] += e.amount; });
+  return { total, share, list: state.people.map(p => ({p, bal: paid[p.id] - share})) };
+}
+
+// En az sayıda ödeme ile hesabı kapatır.
+function settlements(list){
+  const debtors = list.filter(x => x.bal < -0.005).map(x => ({n:x.p.name, a:-x.bal})).sort((a,b)=>b.a-a.a);
+  const creditors = list.filter(x => x.bal > 0.005).map(x => ({n:x.p.name, a:x.bal})).sort((a,b)=>b.a-a.a);
+  const out = []; let i = 0, j = 0;
+  while(i < debtors.length && j < creditors.length){
+    const amt = Math.min(debtors[i].a, creditors[j].a);
+    out.push({from: debtors[i].n, to: creditors[j].n, amt});
+    debtors[i].a -= amt; creditors[j].a -= amt;
+    if(debtors[i].a < 0.005) i++;
+    if(creditors[j].a < 0.005) j++;
+  }
+  return out;
+}
+
+function li(html){ const el = document.createElement("li"); el.innerHTML = html; return el; }
+const esc = s => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function render(){
+  // kişiler
+  const pl = $("peopleList"); pl.innerHTML = "";
+  if(!state.people.length) pl.innerHTML = '<p class="empty">Henüz kimse yok. İlk kişiyi ekle.</p>';
+  state.people.forEach(p => {
+    const el = li(`<span>${esc(p.name)}</span><button class="small" aria-label="${esc(p.name)} kişisini sil">Sil</button>`);
+    el.querySelector("button").onclick = () => removePerson(p.id);
+    pl.appendChild(el);
+  });
+
+  // ödeyen seçimi
+  const sel = $("payer"); const keep = sel.value;
+  sel.innerHTML = state.people.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
+  if(keep && state.people.some(p => String(p.id) === keep)) sel.value = keep;
+
+  // harcamalar
+  const el = $("expenseList"); el.innerHTML = "";
+  if(!state.expenses.length) el.innerHTML = '<p class="empty">Harcama yok. Soldaki formdan ilkini ekle.</p>';
+  state.expenses.forEach(e => {
+    const row = li(`<div><div>${esc(e.desc)}</div><div class="meta">${esc(personName(e.payer))} ödedi</div></div>
+      <div class="acts"><span class="amt">${fmt(e.amount)}</span>
+      <button class="small" data-a="edit">Düzenle</button><button class="small" data-a="del">Sil</button></div>`);
+    row.querySelector('[data-a="edit"]').onclick = () => startEdit(e.id);
+    row.querySelector('[data-a="del"]').onclick = () => removeExpense(e.id);
+    el.appendChild(row);
+  });
+
+  // hesap
+  const b = balances();
+  $("totalAmt").textContent = fmt(b.total);
+  $("shareInfo").textContent = state.people.length
+    ? `Kişi başı pay: ${fmt(b.share)} (${state.people.length} kişi)` : "Kişi ekleyince pay hesaplanır.";
+  const bl = $("balanceList"); bl.innerHTML = "";
+  b.list.forEach(({p, bal}) => {
+    const cls = bal > 0.005 ? "pos" : bal < -0.005 ? "neg" : "";
+    const txt = bal > 0.005 ? `${fmt(bal)} alacaklı` : bal < -0.005 ? `${fmt(-bal)} borçlu` : "Hesap kapalı";
+    bl.appendChild(li(`<span>${esc(p.name)}</span><span class="amt ${cls}">${txt}</span>`));
+  });
+  const sl = $("settleList"); sl.innerHTML = "";
+  const s = settlements(b.list);
+  if(!s.length) sl.innerHTML = '<p class="empty">Ödenecek bir şey yok.</p>';
+  s.forEach(x => sl.appendChild(li(`<span class="pay"><b>${esc(x.from)}</b> → <b>${esc(x.to)}</b></span><span class="amt">${fmt(x.amt)}</span>`)));
+}
+
+$("addPerson").onclick = addPerson;
+$("personName").addEventListener("keydown", e => { if(e.key === "Enter") addPerson(); });
+$("saveExpense").onclick = saveExpense;
+$("cancelEdit").onclick = () => { stopEdit(); $("expenseMsg").textContent = ""; };
+$("resetAll").onclick = () => {
+  if(confirm("Tüm kişiler ve harcamalar silinecek. Emin misin?")){
+    state = { people: [], expenses: [], nextId: 1 }; stopEdit(); save(); render(); }
+};
+
+load(); render();
+</script>
+</body>
+</html>
