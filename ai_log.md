@@ -6,8 +6,9 @@
 *Kullanım amacı:	Fikir bulma, prototip kodu
 
 
-**Sorduğum:** [README]'de yazdığım problemleri karşılayacak özellikte bir şeyler yapabilir misin? Ardından, projede yapmamız gereken diğer şeyleri de hazırlamasını istedim.
-**Aldığım cevap:** HTML, CSS ve JavaScript'in tek dosyada olduğu bir prototip. Kişi ekleme, harcama ekleme/düzenleme/silme, kişi başı pay hesabı, kim kime ödeyecek hesabı ve tarayıcıda veri saklama içeriyor.
+**Sorduğum:** [README]'de yazdığım problemleri karşılayacak özellikte bir şeyler yapmaya çalıştım fakat var olan birkaç eksik var bunları benim için halledebilir misin?
+Ardından, projede yapmamız gereken diğer şeyleri de hazırlamasını istedim.
+**Aldığım cevap:** HTML, CSS ve JavaScript'in tek dosyada olduğu bir prototip. Kişi başı pay hesabı ve tarayıcıda veri saklama içeriyor.
 
 **Test ettiklerim:**
 * 2-3 kişi ekleyip birkaç harcama girdim, sonuçlar doğru çıktı.
