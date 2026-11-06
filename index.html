@@ -19,94 +19,121 @@
   --line:#cfd8d3; --accent:#0f6b57; --accent-ink:#ffffff;
   --plus:#0f6b57; --minus:#b3402a;
 }
+
 /* Telefon veya bilgisayar karanlık moddaysa renkleri otomatik değiştirir */
 @media (prefers-color-scheme: dark){
   :root{--bg:#101815; --surface:#17211d; --ink:#e7efeb; --muted:#93a39c;
     --line:#2b3a34; --accent:#4cc3a3; --accent-ink:#0b1713; --plus:#4cc3a3; --minus:#ef8d77;}
 }
+
 /* Kutuların genişliği kenarlık ve boşluk dahil hesaplansın */
 *{box-sizing:border-box}
+
 /* Sayfanın genel rengi, yazı tipi ve satır aralığı */
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.5}
+
 /* Tüm içeriği ortalar, en fazla 960px genişlikte tutar */
 .wrap{max-width:960px;margin:0 auto;padding:32px 20px 64px}
+
 /* Ana başlık */
 h1{font-size:2.2rem;font-weight:800;margin:0 0 4px;letter-spacing:-.02em}
+
 /* Başlığın altındaki açıklama yazısı */
 .sub{color:var(--muted);margin:0 0 28px;max-width:56ch}
+
 /* Panel başlıkları (Kişiler, Harcamalar...) */
 h2{font-size:1.1rem;margin:0 0 12px;font-weight:600}
+
 /* Panelleri 2 sütuna dizer */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
 /* Ekran 720px'ten darsa (telefon) tek sütuna geçer */
 @media(max-width:720px){.grid{grid-template-columns:1fr}}
+
 /* Her bir kutunun (panelin) görünümü */
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
 .full{grid-column:1/-1}
+
 /* Giriş kutularının üstündeki küçük etiketler */
 label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+
 /* Yazı kutuları ve açılır liste */
 input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;
   background:var(--bg);color:var(--ink);font:inherit}
-/* Klavye ile tıklanınca (Tab) çerçeve gösterir */
-input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
 /* Butonların genel görünümü */
 button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);
   background:transparent;color:var(--ink);padding:8px 12px}
+
 /* Ana buton (Harcamayı ekle) renkli olur */
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);margin-top:14px;font-weight:600}
+
 /* Küçük butonlar (Sil, Düzenle) */
 button.small{padding:4px 9px;font-size:.82rem}
+
 /* Yan yana dizme: input ve buton aynı satırda */
 .row{display:flex;gap:8px}
 .row input{flex:1}
 .row button{white-space:nowrap}
-/* Listelerde madde işaretini kaldırır */
-ul{list-style:none;margin:12px 0 0;padding:0}
+
 /* Liste satırı: solda yazı, sağda tutar/buton */
 li{display:flex;justify-content:space-between;align-items:center;gap:10px;
   padding:10px 0;border-top:1px dashed var(--line)}
 li:first-child{border-top:0}
+
 /* Gri küçük yazı (kim ödedi bilgisi) */
 .meta{color:var(--muted);font-size:.85rem}
+
 /* Tutarlar kalın yazılır ve alt satıra bölünmez */
 .amt{font-weight:600;white-space:nowrap}
 .acts{display:flex;gap:6px}
+
 /* Alacaklı yeşil, borçlu kırmızı */
 .pos{color:var(--plus)} .neg{color:var(--minus)}
+
 /* "Henüz kimse yok" gibi boş liste yazısı */
 .empty{color:var(--muted);font-size:.92rem;margin:12px 0 0}
+
 /* Toplam satırı */
 .total{display:flex;justify-content:space-between;border-top:2px solid var(--ink);
   margin-top:12px;padding-top:10px;font-weight:800}
+
 /* Hata mesajı alanı (kırmızı küçük yazı) */
 .msg{min-height:1.2em;font-size:.88rem;color:var(--minus);margin:8px 0 0}
+
 /* "Ali → Ayşe" ödeme satırı */
 .pay{font-size:1.02rem}
 .pay b{font-weight:800}
+
 /* Sayfa altındaki not */
 footer{margin-top:28px;color:var(--muted);font-size:.85rem}
 </style>
 </head>
 <body>
+
 <!-- ===== HTML: sayfanın iskeleti ===== -->
 <div class="wrap">
+
   <!-- Başlık ve açıklama -->
   <h1>Ortak Gider Takipçisi</h1>
   <p class="sub">Kişileri ekle, harcamaları gir. Kişi başı payı ve kimin kime ne ödemesi gerektiğini otomatik hesaplarız.</p>
 
   <div class="grid">
+
     <!-- PANEL 1: Kişi ekleme -->
     <section class="panel">
       <h2>Kişiler</h2>
       <div class="row">
+
         <!-- Kişi adının yazıldığı kutu (en fazla 30 karakter) -->
         <input id="personName" type="text" placeholder="İsim" aria-label="Kişi adı" maxlength="30">
         <button id="addPerson">Kişi ekle</button>
       </div>
+
       <!-- Hata mesajı buraya yazılır (ör. "Bu isim zaten listede") -->
       <p class="msg" id="personMsg" role="status"></p>
+
       <!-- Kişi listesi, JavaScript tarafından doldurulur -->
       <ul id="peopleList"></ul>
     </section>
@@ -117,13 +144,16 @@ footer{margin-top:28px;color:var(--muted);font-size:.85rem}
       <label for="desc">Açıklama</label>
       <input id="desc" type="text" placeholder="Örn. Market alışverişi" maxlength="60">
       <label for="amount">Tutar (TL)</label>
+
       <!-- type="number": sadece sayı girilir, step="0.01": kuruş yazılabilir -->
       <input id="amount" type="number" min="0" step="0.01" placeholder="0,00" inputmode="decimal">
       <label for="payer">Kim ödedi?</label>
+
       <!-- Ödeyen kişinin seçildiği açılır liste, JavaScript doldurur -->
       <select id="payer"></select>
       <div class="row">
         <button class="primary" id="saveExpense">Harcamayı ekle</button>
+
         <!-- Düzenleme sırasında görünen Vazgeç butonu, başta gizli -->
         <button id="cancelEdit" style="display:none;margin-top:14px">Vazgeç</button>
       </div>
@@ -140,11 +170,14 @@ footer{margin-top:28px;color:var(--muted);font-size:.85rem}
     <!-- PANEL 4: Hesap sonucu -->
     <section class="panel">
       <h2>Hesap durumu</h2>
+
       <!-- Kişi başı pay yazısı -->
       <p class="meta" id="shareInfo"></p>
+
       <!-- Her kişinin alacak/borç durumu -->
       <ul id="balanceList"></ul>
       <h2 style="margin-top:20px">Kim kime ödeyecek?</h2>
+
       <!-- "Ali → Ayşe: 100 TL" satırları -->
       <ul id="settleList"></ul>
     </section>
