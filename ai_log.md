@@ -6,9 +6,34 @@
 *Kullanım amacı:	prototip kodu
 
 
-**Sorduğum:** [README]'de yazdığım problemleri karşılayacak özellikte bir şeyler yapmaya çalıştım fakat var olan birkaç eksik var bunları benim için halledebilir misin?
-Ardından, projede yapmamız gereken diğer şeyleri de hazırlamasını istedim.
-**Aldığım cevap:** HTML, CSS ve JavaScript'in tek dosyada olduğu bir prototip. Kişi başı pay hesabı ve tarayıcıda veri saklama içeriyor.
+** Soru - Cevap Kayıtları
+
+#** 1. Proje problemi
+**Sorduğum soru:**
+> bana günlük hayattan bir problemden bahset
+
+**Verilen cevap:**
+Yapay zeka web ile çözülebilecek 5 problem önerdi: ortak giderleri takip edememek, ders ve ödev tarihlerini kaçırmak, yemek israfı, çalışma zamanını verimsiz kullanmak ve yemekhane menüsüne ulaşamamak. Kendi yaşadığım bir sıkıntıyı seçmemi önerdi.
+
+**Nasıl kullandım:** Listeden ortak gider takibini seçtim.
+
+### 3. Prototip
+**Sorduğum soru:**
+> bahsettiğin bu özellikleri yapabilecek misin
+
+**Verilen cevap (özet):**
+Evet, tek dosyalık `index.html` ile yapılabileceğini söyledi. Kişi ekleme, harcama ekleme, kişi başı pay hesabı, borç durumu ve silme/düzenleme özelliklerini sayıp, bunun giriş sistemi ve veritabanı olmayan bir prototip olacağını belirtti.
+
+**Nasıl kullandım:** Verilen `index.html` dosyasını repoya yükledim ve GitHub Pages ile yayınladım.
+
+### 4. GitHub Pages
+**Sorduğum soru:**
+> save atmama izin vermiyor
+
+**Verilen cevap (özet):**
+Save butonunun gri olmasının Pages'in zaten açık ve kayıtlı olduğunu gösterdiğini, sitenin `2kalayci.github.io/web-projesi/` adresinde açılacağını söyledi.
+
+**Nasıl kullandım:** Adresi açıp sayfanın çalıştığını kontrol ettim.
 
 **Test ettiklerim:**
 * 2-3 kişi ekleyip birkaç harcama girdim, sonuçlar doğru çıktı.
