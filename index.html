@@ -1,267 +1,368 @@
 <!DOCTYPE html>
+<!-- Bu dosyanın bir web sayfası (HTML5) olduğunu tarayıcıya söyler -->
 <html lang="tr">
 <head>
+<!-- Türkçe karakterlerin (ş, ğ, ı) doğru görünmesi için -->
 <meta charset="UTF-8">
+<!-- Telefonda sayfanın ekrana sığması için -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Tarayıcı sekmesinde görünen başlık -->
 <title>webb · Ortak Gider Takipçisi</title>
+<!-- Google'dan yazı tipi (font) yükler -->
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
+/* ===== CSS: sayfanın görünümü ===== */
+
+/* Renkleri değişken yapar. Renk değiştirmek için sadece buraya bakmak yeter */
 :root{
   --bg:#eef1ee; --surface:#fbfcfb; --ink:#16231f; --muted:#5d6b66;
   --line:#cfd8d3; --accent:#0f6b57; --accent-ink:#ffffff;
   --plus:#0f6b57; --minus:#b3402a;
 }
+/* Telefon veya bilgisayar karanlık moddaysa renkleri otomatik değiştirir */
 @media (prefers-color-scheme: dark){
   :root{--bg:#101815; --surface:#17211d; --ink:#e7efeb; --muted:#93a39c;
     --line:#2b3a34; --accent:#4cc3a3; --accent-ink:#0b1713; --plus:#4cc3a3; --minus:#ef8d77;}
 }
+/* Kutuların genişliği kenarlık ve boşluk dahil hesaplansın */
 *{box-sizing:border-box}
+/* Sayfanın genel rengi, yazı tipi ve satır aralığı */
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.5}
+/* Tüm içeriği ortalar, en fazla 960px genişlikte tutar */
 .wrap{max-width:960px;margin:0 auto;padding:32px 20px 64px}
+/* Ana başlık */
 h1{font-size:2.2rem;font-weight:800;margin:0 0 4px;letter-spacing:-.02em}
+/* Başlığın altındaki açıklama yazısı */
 .sub{color:var(--muted);margin:0 0 28px;max-width:56ch}
+/* Panel başlıkları (Kişiler, Harcamalar...) */
 h2{font-size:1.1rem;margin:0 0 12px;font-weight:600}
+/* Panelleri 2 sütuna dizer */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+/* Ekran 720px'ten darsa (telefon) tek sütuna geçer */
 @media(max-width:720px){.grid{grid-template-columns:1fr}}
+/* Her bir kutunun (panelin) görünümü */
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
 .full{grid-column:1/-1}
+/* Giriş kutularının üstündeki küçük etiketler */
 label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+/* Yazı kutuları ve açılır liste */
 input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;
   background:var(--bg);color:var(--ink);font:inherit}
+/* Klavye ile tıklanınca (Tab) çerçeve gösterir */
 input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Butonların genel görünümü */
 button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);
   background:transparent;color:var(--ink);padding:8px 12px}
+/* Ana buton (Harcamayı ekle) renkli olur */
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);margin-top:14px;font-weight:600}
+/* Küçük butonlar (Sil, Düzenle) */
 button.small{padding:4px 9px;font-size:.82rem}
+/* Yan yana dizme: input ve buton aynı satırda */
 .row{display:flex;gap:8px}
 .row input{flex:1}
 .row button{white-space:nowrap}
+/* Listelerde madde işaretini kaldırır */
 ul{list-style:none;margin:12px 0 0;padding:0}
+/* Liste satırı: solda yazı, sağda tutar/buton */
 li{display:flex;justify-content:space-between;align-items:center;gap:10px;
   padding:10px 0;border-top:1px dashed var(--line)}
 li:first-child{border-top:0}
+/* Gri küçük yazı (kim ödedi bilgisi) */
 .meta{color:var(--muted);font-size:.85rem}
+/* Tutarlar kalın yazılır ve alt satıra bölünmez */
 .amt{font-weight:600;white-space:nowrap}
 .acts{display:flex;gap:6px}
+/* Alacaklı yeşil, borçlu kırmızı */
 .pos{color:var(--plus)} .neg{color:var(--minus)}
+/* "Henüz kimse yok" gibi boş liste yazısı */
 .empty{color:var(--muted);font-size:.92rem;margin:12px 0 0}
+/* Toplam satırı */
 .total{display:flex;justify-content:space-between;border-top:2px solid var(--ink);
   margin-top:12px;padding-top:10px;font-weight:800}
+/* Hata mesajı alanı (kırmızı küçük yazı) */
 .msg{min-height:1.2em;font-size:.88rem;color:var(--minus);margin:8px 0 0}
+/* "Ali → Ayşe" ödeme satırı */
 .pay{font-size:1.02rem}
 .pay b{font-weight:800}
+/* Sayfa altındaki not */
 footer{margin-top:28px;color:var(--muted);font-size:.85rem}
 </style>
 </head>
 <body>
+<!-- ===== HTML: sayfanın iskeleti ===== -->
 <div class="wrap">
+  <!-- Başlık ve açıklama -->
   <h1>Ortak Gider Takipçisi</h1>
   <p class="sub">Kişileri ekle, harcamaları gir. Kişi başı payı ve kimin kime ne ödemesi gerektiğini otomatik hesaplarız.</p>
 
   <div class="grid">
+    <!-- PANEL 1: Kişi ekleme -->
     <section class="panel">
       <h2>Kişiler</h2>
       <div class="row">
+        <!-- Kişi adının yazıldığı kutu (en fazla 30 karakter) -->
         <input id="personName" type="text" placeholder="İsim" aria-label="Kişi adı" maxlength="30">
         <button id="addPerson">Kişi ekle</button>
       </div>
+      <!-- Hata mesajı buraya yazılır (ör. "Bu isim zaten listede") -->
       <p class="msg" id="personMsg" role="status"></p>
+      <!-- Kişi listesi, JavaScript tarafından doldurulur -->
       <ul id="peopleList"></ul>
     </section>
 
+    <!-- PANEL 2: Harcama ekleme ve düzenleme formu -->
     <section class="panel">
       <h2 id="formTitle">Harcama ekle</h2>
       <label for="desc">Açıklama</label>
       <input id="desc" type="text" placeholder="Örn. Market alışverişi" maxlength="60">
       <label for="amount">Tutar (TL)</label>
+      <!-- type="number": sadece sayı girilir, step="0.01": kuruş yazılabilir -->
       <input id="amount" type="number" min="0" step="0.01" placeholder="0,00" inputmode="decimal">
       <label for="payer">Kim ödedi?</label>
+      <!-- Ödeyen kişinin seçildiği açılır liste, JavaScript doldurur -->
       <select id="payer"></select>
       <div class="row">
         <button class="primary" id="saveExpense">Harcamayı ekle</button>
+        <!-- Düzenleme sırasında görünen Vazgeç butonu, başta gizli -->
         <button id="cancelEdit" style="display:none;margin-top:14px">Vazgeç</button>
       </div>
       <p class="msg" id="expenseMsg" role="status"></p>
     </section>
 
+    <!-- PANEL 3: Harcama listesi ve toplam -->
     <section class="panel">
       <h2>Harcamalar</h2>
       <ul id="expenseList"></ul>
       <div class="total"><span>Toplam</span><span id="totalAmt">0,00 TL</span></div>
     </section>
 
+    <!-- PANEL 4: Hesap sonucu -->
     <section class="panel">
       <h2>Hesap durumu</h2>
+      <!-- Kişi başı pay yazısı -->
       <p class="meta" id="shareInfo"></p>
+      <!-- Her kişinin alacak/borç durumu -->
       <ul id="balanceList"></ul>
       <h2 style="margin-top:20px">Kim kime ödeyecek?</h2>
+      <!-- "Ali → Ayşe: 100 TL" satırları -->
       <ul id="settleList"></ul>
     </section>
   </div>
 
+  <!-- Sayfa altı: verilerin nerede tutulduğu ve hepsini silme butonu -->
   <footer>Veriler yalnızca bu tarayıcıda saklanır. <button class="small" id="resetAll">Tüm verileri sil</button></footer>
 </div>
 
 <script>
+// ===== JAVASCRIPT: sayfanın çalışma mantığı =====
+
+// Verilerin tarayıcı hafızasında (localStorage) saklanacağı isim
 const KEY = "webb-ortak-gider";
+
+// Bütün veri tek bir nesnede tutulur:
+// people: kişi listesi, expenses: harcama listesi, nextId: her yeni kayıt için artan numara
 let state = { people: [], expenses: [], nextId: 1 };
+
+// Düzenlenen harcamanın numarası. null ise düzenleme yapılmıyor demektir
 let editingId = null;
 
+// Sayfa açılınca tarayıcı hafızasındaki eski veriyi geri yükler
 function load(){
   try{
-    const raw = localStorage.getItem(KEY);
-    if(raw){ const s = JSON.parse(raw);
-      if(s && Array.isArray(s.people) && Array.isArray(s.expenses)) state = s; }
-  }catch(e){}
+    const raw = localStorage.getItem(KEY);   // kayıtlı yazıyı al
+    if(raw){ const s = JSON.parse(raw);      // yazıyı tekrar nesneye çevir
+      if(s && Array.isArray(s.people) && Array.isArray(s.expenses)) state = s; }  // veri düzgünse kullan
+  }catch(e){}   // hata olursa (hafıza kapalıysa) sessizce geç, uygulama çökmesin
 }
+
+// Veriyi tarayıcı hafızasına kaydeder (sayfa kapansa da silinmez)
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 
+// Kısaltma: $("isim") yazmak document.getElementById("isim") yazmakla aynıdır
 const $ = id => document.getElementById(id);
+
+// Sayıyı Türkçe biçimde yazar. Örnek: 1250 -> "1.250,00 TL"
 const fmt = n => n.toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2}) + " TL";
+
+// Numaradan kişinin ismini bulur. Bulamazsa "?" döner
 const personName = id => (state.people.find(p => p.id === id) || {name:"?"}).name;
 
+// KİŞİ EKLE butonuna basılınca çalışır
 function addPerson(){
-  const name = $("personName").value.trim();
-  const msg = $("personMsg");
-  if(!name){ msg.textContent = "Bir isim yaz."; return; }
+  const name = $("personName").value.trim();   // kutudaki yazıyı al, baştaki sondaki boşlukları sil
+  const msg = $("personMsg");                  // hata mesajı alanı
+  if(!name){ msg.textContent = "Bir isim yaz."; return; }   // boşsa uyar ve dur
+  // aynı isim daha önce eklendi mi (büyük/küçük harf fark etmez)
   if(state.people.some(p => p.name.toLowerCase() === name.toLowerCase())){
     msg.textContent = "Bu isim zaten listede."; return; }
-  state.people.push({id: state.nextId++, name});
-  $("personName").value = ""; msg.textContent = "";
-  save(); render();
+  state.people.push({id: state.nextId++, name});   // yeni kişiyi listeye ekle, numara ver
+  $("personName").value = ""; msg.textContent = "";   // kutuyu ve mesajı temizle
+  save(); render();   // kaydet ve ekranı yenile
 }
 
+// Kişinin yanındaki SİL butonuna basılınca çalışır
 function removePerson(id){
+  // kişi bir harcama ödediyse silmeye izin verme (harcama sahipsiz kalırdı)
   if(state.expenses.some(e => e.payer === id)){
     $("personMsg").textContent = personName(id) + " bir harcamayı ödemiş. Önce o harcamayı sil veya değiştir."; return; }
-  state.people = state.people.filter(p => p.id !== id);
+  state.people = state.people.filter(p => p.id !== id);   // o kişi dışındakileri tut
   $("personMsg").textContent = "";
   save(); render();
 }
 
+// HARCAMAYI EKLE butonuna basılınca çalışır (düzenleme modunda ise günceller)
 function saveExpense(){
-  const desc = $("desc").value.trim();
-  const amount = parseFloat($("amount").value);
-  const payer = parseInt($("payer").value, 10);
+  const desc = $("desc").value.trim();                  // açıklama
+  const amount = parseFloat($("amount").value);         // tutar (yazıyı sayıya çevirir)
+  const payer = parseInt($("payer").value, 10);         // ödeyen kişinin numarası
   const msg = $("expenseMsg");
+  // aşağıdakiler kontrol: hatalıysa mesaj yaz ve fonksiyondan çık
   if(state.people.length < 2){ msg.textContent = "Önce en az iki kişi ekle."; return; }
   if(!desc){ msg.textContent = "Açıklama yaz."; return; }
   if(!(amount > 0)){ msg.textContent = "Tutar sıfırdan büyük olmalı."; return; }
   if(!payer){ msg.textContent = "Ödeyen kişiyi seç."; return; }
   if(editingId){
+    // DÜZENLEME: mevcut harcamayı bul ve bilgilerini değiştir
     const e = state.expenses.find(x => x.id === editingId);
     if(e){ e.desc = desc; e.amount = amount; e.payer = payer; }
   } else {
+    // YENİ EKLEME: listeye yeni harcama ekle
     state.expenses.push({id: state.nextId++, desc, amount, payer});
   }
-  stopEdit(); msg.textContent = "";
+  stopEdit(); msg.textContent = "";   // formu eski haline getir
   save(); render();
 }
 
+// DÜZENLE butonuna basılınca çalışır: harcamanın bilgilerini forma doldurur
 function startEdit(id){
-  const e = state.expenses.find(x => x.id === id); if(!e) return;
-  editingId = id;
+  const e = state.expenses.find(x => x.id === id); if(!e) return;   // harcamayı bul
+  editingId = id;   // düzenleme modunu aç
   $("desc").value = e.desc; $("amount").value = e.amount; $("payer").value = e.payer;
-  $("formTitle").textContent = "Harcamayı düzenle";
-  $("saveExpense").textContent = "Değişiklikleri kaydet";
-  $("cancelEdit").style.display = "";
-  $("desc").focus();
+  $("formTitle").textContent = "Harcamayı düzenle";            // başlığı değiştir
+  $("saveExpense").textContent = "Değişiklikleri kaydet";      // buton yazısını değiştir
+  $("cancelEdit").style.display = "";                          // Vazgeç butonunu göster
+  $("desc").focus();   // imleci açıklama kutusuna koy
 }
+
+// Formu ilk haline döndürür (düzenleme bitince veya Vazgeç'e basılınca)
 function stopEdit(){
-  editingId = null;
-  $("desc").value = ""; $("amount").value = "";
+  editingId = null;   // düzenleme modunu kapat
+  $("desc").value = ""; $("amount").value = "";   // kutuları temizle
   $("formTitle").textContent = "Harcama ekle";
   $("saveExpense").textContent = "Harcamayı ekle";
-  $("cancelEdit").style.display = "none";
+  $("cancelEdit").style.display = "none";         // Vazgeç butonunu gizle
 }
+
+// HARCAMA SİL butonuna basılınca çalışır
 function removeExpense(id){
-  state.expenses = state.expenses.filter(e => e.id !== id);
-  if(editingId === id) stopEdit();
+  state.expenses = state.expenses.filter(e => e.id !== id);   // o harcama dışındakileri tut
+  if(editingId === id) stopEdit();   // silinen harcama düzenleniyorsa formu sıfırla
   save(); render();
 }
 
 // Bakiye: ödediği - payı. Pozitif = alacaklı, negatif = borçlu.
 function balances(){
+  // reduce: tüm harcama tutarlarını toplar
   const total = state.expenses.reduce((s,e) => s + e.amount, 0);
+  // kişi başı pay = toplam / kişi sayısı (kişi yoksa 0, sıfıra bölmeyi önler)
   const share = state.people.length ? total / state.people.length : 0;
+  // her kişinin ödediği toplam tutarı tutacak kutu, hepsi 0'dan başlar
   const paid = {}; state.people.forEach(p => paid[p.id] = 0);
+  // her harcamayı ödeyen kişinin toplamına ekle
   state.expenses.forEach(e => { if(e.payer in paid) paid[e.payer] += e.amount; });
+  // sonuç: toplam, kişi başı pay ve herkesin bakiyesi (ödediği - pay)
   return { total, share, list: state.people.map(p => ({p, bal: paid[p.id] - share})) };
 }
 
 // En az sayıda ödeme ile hesabı kapatır.
 function settlements(list){
+  // borçlular (bakiyesi eksi olanlar): en çok borçlu en başta olacak şekilde sıralanır
   const debtors = list.filter(x => x.bal < -0.005).map(x => ({n:x.p.name, a:-x.bal})).sort((a,b)=>b.a-a.a);
+  // alacaklılar (bakiyesi artı olanlar): en çok alacaklı en başta
   const creditors = list.filter(x => x.bal > 0.005).map(x => ({n:x.p.name, a:x.bal})).sort((a,b)=>b.a-a.a);
-  const out = []; let i = 0, j = 0;
+  const out = []; let i = 0, j = 0;   // out: sonuç listesi, i: borçlu sırası, j: alacaklı sırası
   while(i < debtors.length && j < creditors.length){
+    // ödenecek miktar, borç ile alacağın küçüğüdür
     const amt = Math.min(debtors[i].a, creditors[j].a);
-    out.push({from: debtors[i].n, to: creditors[j].n, amt});
-    debtors[i].a -= amt; creditors[j].a -= amt;
-    if(debtors[i].a < 0.005) i++;
-    if(creditors[j].a < 0.005) j++;
+    out.push({from: debtors[i].n, to: creditors[j].n, amt});   // "kim kime ne kadar" kaydı
+    debtors[i].a -= amt; creditors[j].a -= amt;                // ödenen kadar ikisinden de düş
+    if(debtors[i].a < 0.005) i++;       // borcu bittiyse sıradaki borçluya geç
+    if(creditors[j].a < 0.005) j++;     // alacağı bittiyse sıradaki alacaklıya geç
   }
   return out;
 }
 
+// Verilen HTML'den bir liste satırı (<li>) oluşturur
 function li(html){ const el = document.createElement("li"); el.innerHTML = html; return el; }
+
+// Güvenlik: yazıdaki <, >, & gibi özel karakterleri zararsız hale getirir
+// (biri isim yerine kod yazarsa sayfayı bozamaz)
 const esc = s => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
+// Ekrandaki her şeyi veriye göre baştan çizer. Her değişiklikten sonra çağrılır
 function render(){
-  // kişiler
-  const pl = $("peopleList"); pl.innerHTML = "";
+  // --- Kişi listesi ---
+  const pl = $("peopleList"); pl.innerHTML = "";   // önce listeyi boşalt
   if(!state.people.length) pl.innerHTML = '<p class="empty">Henüz kimse yok. İlk kişiyi ekle.</p>';
-  state.people.forEach(p => {
+  state.people.forEach(p => {   // her kişi için bir satır oluştur
     const el = li(`<span>${esc(p.name)}</span><button class="small" aria-label="${esc(p.name)} kişisini sil">Sil</button>`);
-    el.querySelector("button").onclick = () => removePerson(p.id);
-    pl.appendChild(el);
+    el.querySelector("button").onclick = () => removePerson(p.id);   // Sil butonuna tıklanınca kişiyi sil
+    pl.appendChild(el);   // satırı listeye ekle
   });
 
-  // ödeyen seçimi
-  const sel = $("payer"); const keep = sel.value;
+  // --- "Kim ödedi?" açılır listesi ---
+  const sel = $("payer"); const keep = sel.value;   // seçili olanı hatırla
   sel.innerHTML = state.people.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
-  if(keep && state.people.some(p => String(p.id) === keep)) sel.value = keep;
+  if(keep && state.people.some(p => String(p.id) === keep)) sel.value = keep;   // seçimi geri koy
 
-  // harcamalar
+  // --- Harcama listesi ---
   const el = $("expenseList"); el.innerHTML = "";
   if(!state.expenses.length) el.innerHTML = '<p class="empty">Harcama yok. Soldaki formdan ilkini ekle.</p>';
-  state.expenses.forEach(e => {
+  state.expenses.forEach(e => {   // her harcama için bir satır
     const row = li(`<div><div>${esc(e.desc)}</div><div class="meta">${esc(personName(e.payer))} ödedi</div></div>
       <div class="acts"><span class="amt">${fmt(e.amount)}</span>
       <button class="small" data-a="edit">Düzenle</button><button class="small" data-a="del">Sil</button></div>`);
-    row.querySelector('[data-a="edit"]').onclick = () => startEdit(e.id);
-    row.querySelector('[data-a="del"]').onclick = () => removeExpense(e.id);
+    row.querySelector('[data-a="edit"]').onclick = () => startEdit(e.id);      // Düzenle butonu
+    row.querySelector('[data-a="del"]').onclick = () => removeExpense(e.id);   // Sil butonu
     el.appendChild(row);
   });
 
-  // hesap
-  const b = balances();
-  $("totalAmt").textContent = fmt(b.total);
+  // --- Hesap durumu ---
+  const b = balances();   // toplam, pay ve bakiyeleri hesapla
+  $("totalAmt").textContent = fmt(b.total);   // toplam tutarı yaz
   $("shareInfo").textContent = state.people.length
     ? `Kişi başı pay: ${fmt(b.share)} (${state.people.length} kişi)` : "Kişi ekleyince pay hesaplanır.";
   const bl = $("balanceList"); bl.innerHTML = "";
   b.list.forEach(({p, bal}) => {
+    // bakiye artıysa yeşil (pos), eksiyse kırmızı (neg) renk sınıfı seç
     const cls = bal > 0.005 ? "pos" : bal < -0.005 ? "neg" : "";
     const txt = bal > 0.005 ? `${fmt(bal)} alacaklı` : bal < -0.005 ? `${fmt(-bal)} borçlu` : "Hesap kapalı";
     bl.appendChild(li(`<span>${esc(p.name)}</span><span class="amt ${cls}">${txt}</span>`));
   });
+
+  // --- Kim kime ödeyecek ---
   const sl = $("settleList"); sl.innerHTML = "";
-  const s = settlements(b.list);
+  const s = settlements(b.list);   // ödeme listesini hesapla
   if(!s.length) sl.innerHTML = '<p class="empty">Ödenecek bir şey yok.</p>';
   s.forEach(x => sl.appendChild(li(`<span class="pay"><b>${esc(x.from)}</b> → <b>${esc(x.to)}</b></span><span class="amt">${fmt(x.amt)}</span>`)));
 }
 
-$("addPerson").onclick = addPerson;
+// ===== Butonları fonksiyonlara bağlar =====
+$("addPerson").onclick = addPerson;   // Kişi ekle butonuna tıklanınca addPerson çalışır
+// isim kutusunda Enter'a basınca da kişi eklenir
 $("personName").addEventListener("keydown", e => { if(e.key === "Enter") addPerson(); });
-$("saveExpense").onclick = saveExpense;
-$("cancelEdit").onclick = () => { stopEdit(); $("expenseMsg").textContent = ""; };
+$("saveExpense").onclick = saveExpense;   // Harcamayı ekle butonu
+$("cancelEdit").onclick = () => { stopEdit(); $("expenseMsg").textContent = ""; };   // Vazgeç butonu
+// Tüm verileri sil butonu: önce onay sorar, evet denirse her şeyi sıfırlar
 $("resetAll").onclick = () => {
   if(confirm("Tüm kişiler ve harcamalar silinecek. Emin misin?")){
     state = { people: [], expenses: [], nextId: 1 }; stopEdit(); save(); render(); }
 };
 
-load(); render();
+// Sayfa açılınca çalışan ilk iki satır:
+load();     // eski veriyi hafızadan yükle
+render();   // ekrana çiz
 </script>
 </body>
 </html>
