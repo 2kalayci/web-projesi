@@ -35,7 +35,8 @@ Save butonunun gri olmasının Pages'in zaten açık ve kayıtlı olduğunu gös
 
 **Nasıl kullandım:** Adresi açıp sayfanın çalıştığını kontrol ettim.
 
-!!Yapmamda yardım ettiği kodları gözden geçirdim hangisinin ne işe yaradığını öğrendim ve bildiklerimle değiştirebileceğim şeyleri değiştirdim.!!
+!!Yapmamda yardım ettiği kodları gözden geçirdim hangisinin ne işe yaradığını öğrendim ve bildiklerimle değiştirebileceğim şeyleri değiştirdim.
+Ayrıca her satıra öğrenmek amaçlı "/**/" ile küçük notlar hangisinin ne işe yaradığını belirttim. !!
 
 **Test ettiklerim:**
 * 2-3 kişi ekleyip birkaç harcama girdim, sonuçlar doğru çıktı.
